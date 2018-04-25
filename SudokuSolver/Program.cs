@@ -12,6 +12,7 @@ namespace SudokuSolver
         static void Main(string[] args)
         {
             Sudoku sudoku = new Sudoku();
+            sudoku.PrintToConsole();
             SudokuSolver solver = new SudokuSolver(sudoku);
             Console.WriteLine($"Solved: {solver.Solve()}");
         }
