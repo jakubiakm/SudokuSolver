@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,26 @@ namespace SudokuSolver
         {
             Size = 9;
             Board = new int[Size, Size];
+        }
+
+        public Sudoku(string path)
+        {
+            var lines = File.ReadLines(path);
+            Size = lines.Count();
+            if ((int)Math.Sqrt(Size) != Math.Sqrt(Size))
+                throw new InvalidDataException("Sudoku musi być rozmiaru n x n, gdzie n to kwadrat liczby naturalnej.");
+            Board = new int[Size, Size];
+            int y = 0;
+            foreach (var line in lines)
+            {
+                int x = 0;
+                var numbers = line.Split(' ').Select(Int32.Parse).ToList();
+                if (numbers.Count != Size)
+                    throw new InvalidDataException("Sudoku musi być rozmiaru n x n, gdzie n to kwadrat liczby naturalnej.");
+                foreach (var number in numbers)
+                    Board[x++, y] = number;
+                y++;
+            }
         }
 
         /// <summary>
