@@ -46,6 +46,62 @@ namespace SudokuSolver
         }
 
         /// <summary>
+        /// Sprawdza czy aktualne sudoku jest poprawnie wypełnione (czy elementy w wierszach, kolumnach i podkwadratach się nie powtarzają).
+        /// </summary>
+        /// <returns></returns>
+        public bool IsCorrect()
+        {
+            List<int> numbers = new List<int>();
+            bool unique = false;
+            for (int i = 0; i != Size; i++)
+            {
+                numbers.Clear();
+                for (int j = 0; j != Size; j++)
+                    if (Board[i, j] != 0)
+                        numbers.Add(Board[i, j]);
+                var diffChecker = new HashSet<int>();
+                unique = numbers.All(diffChecker.Add);
+                if (!unique)
+                    return false;
+                numbers.Clear();
+                for (int j = 0; j != Size; j++)
+                    if (Board[j, i] != 0)
+                        numbers.Add(Board[j, i]);
+                diffChecker = new HashSet<int>();
+                unique = numbers.All(diffChecker.Add);
+                if (!unique)
+                    return false;
+                numbers.Clear();
+                int subsquareLength = (int)Math.Sqrt(Size);
+                int startx = (i % subsquareLength) * subsquareLength;
+                int starty = (i / subsquareLength) * subsquareLength;
+                for (int p = startx; p != startx + subsquareLength; p++)
+                    for (int q = starty; q != starty + subsquareLength; q++)
+                        if (Board[p, q] != 0)
+                            numbers.Add(Board[p, q]);
+                diffChecker = new HashSet<int>();
+                unique = numbers.All(diffChecker.Add);
+                if (!unique)
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Sprawdza czy sudoku jest w pełni wypełnione
+        /// </summary>
+        /// <returns></returns>
+        public bool IsFull()
+        {
+            for (int i = 0; i != Size; i++)
+                for (int j = 0; j != Size; j++)
+                    if (Board[i, j] == 0)
+                        return false;
+            return true;
+        }
+
+        /// <summary>
         /// Wyświetla aktualnie wypełnione sudoku w konsoli. Jeśli paramatery x i y są różne od -1, to podświetla na zielono element (x, y) w tablicy.
         /// </summary>
         /// <param name="x"></param>

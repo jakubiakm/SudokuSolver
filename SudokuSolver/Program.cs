@@ -10,7 +10,11 @@ namespace SudokuSolver
 {
     class Program
     {
-        public static readonly string[] SudokuBoardPaths = { "easy_9x9_1.txt" };
+        public static readonly string[] SudokuBoardPaths = 
+        {
+            "veryeasy_9x9_1.txt",
+            "easy_9x9_1.txt"
+        };
 
         static void Main(string[] args)
         {
@@ -20,7 +24,6 @@ namespace SudokuSolver
                 Console.WriteLine();
                 string sudokuFilePath = $"{Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()))}/SudokuBoards/{path}";
                 Sudoku sudoku = new Sudoku(sudokuFilePath);
-                sudoku.PrintToConsole();
                 SudokuSolver solver = new SudokuSolver(sudoku);
                 Console.WriteLine($"Solved: {solver.Solve()}");
             }
