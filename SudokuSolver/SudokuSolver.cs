@@ -14,13 +14,13 @@ namespace SudokuSolver
 
         public bool Solve()
         {
+            sudoku.PrintToConsole();
             bool changed = false;
             while (!sudoku.IsFull())
             {
                 if (!sudoku.IsCorrect())
                     return false;
                 changed = FillBlankElement();
-                //sudoku.PrintToConsole();
             }
             return sudoku.IsCorrect();
         }
@@ -39,6 +39,50 @@ namespace SudokuSolver
                         {
                             sudoku.Board[i, j] = possibilities[i, j][0];
                             sudoku.PrintToConsole(i, j);
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            if(!changed)
+            {
+                for(int i = 0; i != sudoku.Size; i++)
+                {
+                    List<int> allPosibilities = new List<int>();
+                    int subsquareLength = (int)Math.Sqrt(sudoku.Size);
+                    int startx = (i % subsquareLength) * subsquareLength;
+                    int starty = (i / subsquareLength) * subsquareLength;
+                    for (int p = startx; p != startx + subsquareLength; p++)
+                    {
+                        for (int q = starty; q != starty + subsquareLength; q++)
+                        {
+                            if (sudoku.Board[p, q] == 0)
+                            {
+                                allPosibilities.AddRange(possibilities[p, q]);
+                            }
+                        }
+                    }
+                    var groups = allPosibilities.GroupBy(x => x).OrderBy(x => x.Count()).ToList();
+                    if (groups.Count == 0)
+                        continue;
+                    var group = groups[0];
+                    if(group.Count() == 1)
+                    {
+                        var key = group.Key;
+                        for (int p = startx; p != startx + subsquareLength; p++)
+                        {
+                            for (int q = starty; q != starty + subsquareLength; q++)
+                            {
+                                if (sudoku.Board[p, q] == 0)
+                                {
+                                    if (possibilities[p, q].Contains(key))
+                                    {
+                                        sudoku.Board[p, q] = key;
+                                        sudoku.PrintToConsole(p, q);
+                                        return true;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
