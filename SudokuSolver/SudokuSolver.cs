@@ -8,27 +8,41 @@ namespace SudokuSolver
 {
     public class SudokuSolver
     {
-        public Sudoku sudoku { get; private set; }
+        public bool ShowProgress { get; set; }
 
-        public SudokuSolver(Sudoku sudoku) => this.sudoku = sudoku;
-
-        public bool Solve()
+        public SudokuSolver(bool showProgress = true)
         {
-            sudoku.PrintToConsole();
+            ShowProgress = showProgress;
+        }
+
+        public bool Solve(Sudoku sudoku)
+        {
+            if (ShowProgress)
+                sudoku.PrintToConsole();
             bool changed = false;
             while (!sudoku.IsFull())
             {
                 if (!sudoku.IsCorrect())
                     return false;
-                changed = FillBlankElement();
+                changed = FillBlankElement(sudoku);
+                if (changed == false)
+                {
+                    foreach (var s in GetPossibleBoards(sudoku))
+                    {
+                        if (Solve(s) == true)
+                            return true;
+                    }
+                    return false;
+                }
             }
+            sudoku.PrintToConsole();
             return sudoku.IsCorrect();
         }
 
-        public bool FillBlankElement()
+        public bool FillBlankElement(Sudoku sudoku)
         {
             bool changed = false;
-            var possibilities = GetBoardPossibilities();
+            var possibilities = GetSudokuPossibilities(sudoku);
             for (int i = 0; i != sudoku.Size; i++)
             {
                 for (int j = 0; j != sudoku.Size; j++)
@@ -37,16 +51,17 @@ namespace SudokuSolver
                     {
                         if (possibilities[i, j].Count == 1)
                         {
-                            sudoku.Board[i, j] = possibilities[i, j][0];
-                            sudoku.PrintToConsole(i, j);
+                            sudoku.Board[i, j] = possibilities[i, j][0].Value;
+                            if (ShowProgress)
+                                sudoku.PrintToConsole(i, j);
                             changed = true;
                         }
                     }
                 }
             }
-            if(!changed)
+            if (!changed)
             {
-                for(int i = 0; i != sudoku.Size; i++)
+                for (int i = 0; i != sudoku.Size; i++)
                 {
                     List<int> allPosibilities = new List<int>();
                     int subsquareLength = (int)Math.Sqrt(sudoku.Size);
@@ -58,7 +73,7 @@ namespace SudokuSolver
                         {
                             if (sudoku.Board[p, q] == 0)
                             {
-                                allPosibilities.AddRange(possibilities[p, q]);
+                                allPosibilities.AddRange(possibilities[p, q].Select(l => l.Value));
                             }
                         }
                     }
@@ -66,7 +81,7 @@ namespace SudokuSolver
                     if (groups.Count == 0)
                         continue;
                     var group = groups[0];
-                    if(group.Count() == 1)
+                    if (group.Count() == 1)
                     {
                         var key = group.Key;
                         for (int p = startx; p != startx + subsquareLength; p++)
@@ -75,10 +90,11 @@ namespace SudokuSolver
                             {
                                 if (sudoku.Board[p, q] == 0)
                                 {
-                                    if (possibilities[p, q].Contains(key))
+                                    if (possibilities[p, q].Select(l => l.Value).Contains(key))
                                     {
                                         sudoku.Board[p, q] = key;
-                                        sudoku.PrintToConsole(p, q);
+                                        if (ShowProgress)
+                                            sudoku.PrintToConsole(p, q);
                                         return true;
                                     }
                                 }
@@ -90,25 +106,59 @@ namespace SudokuSolver
             return changed;
         }
 
-        public List<int>[,] GetBoardPossibilities()
+        public List<Sudoku> GetPossibleBoards(Sudoku sudoku)
         {
-            List<int>[,] possibilites = new List<int>[sudoku.Size, sudoku.Size];
+            List<Sudoku> sudokus = new List<Sudoku>();
+            var possibilities = GetSudokuPossibilities(sudoku);
+            var probabilities = GetBoardProbabilities(sudoku);
+            int min = int.MaxValue;
+            for (int i = 0; i != sudoku.Size; i++)
+                for (int j = 0; j != sudoku.Size; j++)
+                    if (possibilities[i, j] != null && possibilities[i, j].Count < min)
+                        min = possibilities[i, j].Count;
+            for (int i = 0; i != sudoku.Size; i++)
+                for (int j = 0; j != sudoku.Size; j++)
+                {
+                    if (possibilities[i, j] != null && possibilities[i, j].Count == min)
+                    {
+                        foreach (var possibility in possibilities[i, j])
+                        {
+                            int[,] newBoard = (int[,])sudoku.Board.Clone();
+                            newBoard[i, j] = possibility.Value;
+                            sudokus.Add(new Sudoku(newBoard));
+                        }
+                        return sudokus;
+                    }
+                }
+            return sudokus;
+        }
+
+        public List<int>[,] GetBoardProbabilities(Sudoku sudoku)
+        {
+            List<int>[,] probabilities = new List<int>[sudoku.Size, sudoku.Size];
+            
+            return probabilities;
+        }
+
+        public List<SudokuPossibility>[,] GetSudokuPossibilities(Sudoku sudoku)
+        {
+            List<SudokuPossibility>[,] possibilites = new List<SudokuPossibility>[sudoku.Size, sudoku.Size];
             for (int i = 0; i != sudoku.Size; i++)
             {
                 for (int j = 0; j != sudoku.Size; j++)
                 {
                     if (sudoku.Board[i, j] == 0)
                     {
-                        possibilites[i, j] = GetPossibilities(i, j);
+                        possibilites[i, j] = GetPossibilities(sudoku, i, j);
                     }
                 }
             }
             return possibilites;
         }
 
-        public List<int> GetPossibilities(int x, int y)
+        public List<SudokuPossibility> GetPossibilities(Sudoku sudoku, int x, int y)
         {
-            List<int> possibilities = new List<int>();
+            List<SudokuPossibility> possibilities = new List<SudokuPossibility>();
             bool[] found = new bool[sudoku.Size];
             for (int i = 0; i != sudoku.Size; i++)
             {
@@ -126,7 +176,7 @@ namespace SudokuSolver
                         found[sudoku.Board[p, q] - 1] = true;
             for (int i = 0; i != found.Length; i++)
                 if (!found[i])
-                    possibilities.Add(i + 1);
+                    possibilities.Add(new SudokuPossibility(i + 1, 0));
             return possibilities;
         }
     }

@@ -25,6 +25,12 @@ namespace SudokuSolver
             Board = new int[Size, Size];
         }
 
+        public Sudoku(int[,] board)
+        {
+            Size = board.GetLength(0);
+            Board = board;
+        }
+
         public Sudoku(string path)
         {
             var lines = File.ReadLines(path);
