@@ -13,26 +13,26 @@ namespace SudokuSolver
     {
         public static readonly string[] SudokuBoardPaths =
         {
-            "veryeasy_9x9_1.txt",
-            "easy_9x9_1.txt",
-            "easy_9x9_2.txt",
-            "easy_9x9_3.txt",
-            "medium_9x9_1.txt",
-            "medium_9x9_2.txt",
-            "medium_9x9_3.txt",
-            "hard_9x9_1.txt",
-            "veryhard_9x9_1.txt",
+            //"veryeasy_9x9_1.txt",
+            //"easy_9x9_1.txt",
+            //"easy_9x9_2.txt",
+            //"easy_9x9_3.txt",
+            //"medium_9x9_1.txt",
+            //"medium_9x9_2.txt",
+            //"medium_9x9_3.txt",
+            //"hard_9x9_1.txt",
+            //"veryhard_9x9_1.txt",
 
-            "medium_16x16_1.txt",
-            "hard_16x16_1.txt",
+            //"medium_16x16_1.txt",
+            //"hard_16x16_1.txt",
 
-            "medium_25x25_1.txt",
+            //"medium_25x25_1.txt",
             "hard_25x25_1.txt",
             /////////////////////
-            "hard_25x25_6.txt",
-            "hard_25x25_4.txt",
-            "veryhard_25x25_1.txt",
-            "veryhard_25x25_2.txt",
+            //"hard_25x25_6.txt",
+            //"hard_25x25_4.txt",
+            //"veryhard_25x25_1.txt",
+            //"veryhard_25x25_2.txt",
         };
 
         static void Main(string[] args)
@@ -49,6 +49,9 @@ namespace SudokuSolver
                 sudoku.PrintToConsole();
                 Console.WriteLine($"Solved: {solver.Solve(sudoku)}");
                 Console.WriteLine($"Time: {sw.ElapsedMilliseconds} miliseconds");
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine("-------------------------");
             }
         }
     }

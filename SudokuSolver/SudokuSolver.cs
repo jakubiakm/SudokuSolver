@@ -109,19 +109,33 @@ namespace SudokuSolver
         public List<Sudoku> GetPossibleBoards(Sudoku sudoku)
         {
             List<Sudoku> sudokus = new List<Sudoku>();
-            var possibilities = GetSudokuPossibilities(sudoku);
-            var probabilities = GetBoardProbabilities(sudoku);
+            var probabilities = GetSudokuProbabilities(sudoku);
             int min = int.MaxValue;
+            double minProbability = double.MaxValue;
             for (int i = 0; i != sudoku.Size; i++)
                 for (int j = 0; j != sudoku.Size; j++)
-                    if (possibilities[i, j] != null && possibilities[i, j].Count < min)
-                        min = possibilities[i, j].Count;
+                    if (probabilities[i, j] != null && probabilities[i, j].Count != 0 && probabilities[i, j].Count <= min)
+                    {
+                        if (probabilities[i, j].Count < min)
+                        {
+                            min = probabilities[i, j].Count;
+                            minProbability = probabilities[i, j].Min(x => x.Probability);
+                        }
+                        else
+                        {
+                            if (probabilities[i, j].Min(x => x.Probability) < minProbability)
+                            {
+                                min = probabilities[i, j].Count;
+                                minProbability = probabilities[i, j].Min(x => x.Probability);
+                            }
+                        }
+                    }
             for (int i = 0; i != sudoku.Size; i++)
                 for (int j = 0; j != sudoku.Size; j++)
                 {
-                    if (possibilities[i, j] != null && possibilities[i, j].Count == min)
+                    if (probabilities[i, j] != null && probabilities[i, j].Count == min && probabilities[i, j].Min(x => x.Probability) == minProbability)
                     {
-                        foreach (var possibility in possibilities[i, j])
+                        foreach (var possibility in probabilities[i, j].OrderBy(x => x.Probability))
                         {
                             int[,] newBoard = (int[,])sudoku.Board.Clone();
                             newBoard[i, j] = possibility.Value;
@@ -133,11 +147,42 @@ namespace SudokuSolver
             return sudokus;
         }
 
-        public List<int>[,] GetBoardProbabilities(Sudoku sudoku)
+        public List<SudokuPossibility>[,] GetSudokuProbabilities(Sudoku sudoku)
         {
-            List<int>[,] probabilities = new List<int>[sudoku.Size, sudoku.Size];
-            
-            return probabilities;
+            var possibilities = GetSudokuPossibilities(sudoku);
+            for (int i = 0; i != sudoku.Size; i++)
+            {
+                for (int j = 0; j != sudoku.Size; j++)
+                {
+                    if (possibilities[i, j] != null)
+                    {
+                        foreach (var possibility in possibilities[i, j])
+                        {
+                            possibility.Probability = GetSubsquareOccurences(sudoku, possibilities, i, j, possibility.Value);
+                        }
+                    }
+                }
+            }
+            return possibilities;
+        }
+
+        public int GetSubsquareOccurences(Sudoku sudoku, List<SudokuPossibility>[,] possibilities, int x, int y, int value)
+        {
+            int subsquareLength = (int)Math.Sqrt(sudoku.Size);
+            int occurences = 0;
+            int startx = (x / subsquareLength) * subsquareLength;
+            int starty = (y / subsquareLength) * subsquareLength;
+            for (int p = startx; p != startx + subsquareLength; p++)
+            {
+                for (int q = starty; q != starty + subsquareLength; q++)
+                {
+                    if (x != p && y != q && possibilities[p, q] != null && possibilities[p,q].Where(l => l.Value == value).Count() > 0)
+                    {
+                        occurences++;
+                    }
+                }
+            }
+            return occurences;
         }
 
         public List<SudokuPossibility>[,] GetSudokuPossibilities(Sudoku sudoku)
