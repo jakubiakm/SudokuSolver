@@ -11,32 +11,11 @@ namespace SudokuSolver
 {
     class Program
     {
-        public static readonly string[] SudokuBoardPaths =
-        {
-            //"veryeasy_9x9_1.txt",
-            //"easy_9x9_1.txt",
-            //"easy_9x9_2.txt",
-            //"easy_9x9_3.txt",
-            //"medium_9x9_1.txt",
-            //"medium_9x9_2.txt",
-            //"medium_9x9_3.txt",
-            //"hard_9x9_1.txt",
-            //"veryhard_9x9_1.txt",
-
-            //"medium_16x16_1.txt",
-            //"hard_16x16_1.txt",
-
-            //"medium_25x25_1.txt",
-            "hard_25x25_1.txt",
-            /////////////////////
-            //"hard_25x25_6.txt",
-            //"hard_25x25_4.txt",
-            //"veryhard_25x25_1.txt",
-            //"veryhard_25x25_2.txt",
-        };
+        public static String[] SudokuBoardPaths;
 
         static void Main(string[] args)
         {
+            SudokuBoardPaths = readFromFile();
             foreach (var path in SudokuBoardPaths)
             {
                 Console.WriteLine($"Solve sudoku {path}");
@@ -53,6 +32,33 @@ namespace SudokuSolver
                 Console.WriteLine();
                 Console.WriteLine("-------------------------");
             }
+        }
+        static String[] readFromFile()
+        {
+            List<String> files = new List<String>();
+            try
+            {   // Open the text file using a stream reader.
+                using (StreamReader sr = new StreamReader("../../SudokuBoards.txt"))
+                {
+                    // Read the stream to a string, and write the string to the console.
+                    String line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        if (line[0] == '!')
+                        {
+                            continue;
+                        }
+                        files.Add(line);
+                        Console.WriteLine(line);                      
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("The file could not be read:");
+                Console.WriteLine(e.Message);
+            }
+            return files.ToArray();
         }
     }
 }
