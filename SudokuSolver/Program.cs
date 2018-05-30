@@ -20,7 +20,7 @@ namespace SudokuSolver
             {
                 Console.WriteLine($"Solve sudoku {path}");
                 Console.WriteLine();
-                string sudokuFilePath = $"{Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()))}/SudokuBoards/{path}";
+                string sudokuFilePath = $"SudokuBoards/{path}";
                 Sudoku sudoku = new Sudoku(sudokuFilePath);
                 SudokuSolver solver = new SudokuSolver(false);
                 Stopwatch sw = new Stopwatch();
@@ -38,7 +38,7 @@ namespace SudokuSolver
             List<String> files = new List<String>();
             try
             {   // Open the text file using a stream reader.
-                using (StreamReader sr = new StreamReader("../../SudokuBoards.txt"))
+                using (StreamReader sr = new StreamReader("SudokuBoards.txt"))
                 {
                     // Read the stream to a string, and write the string to the console.
                     String line;
